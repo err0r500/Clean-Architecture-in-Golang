@@ -32,7 +32,4 @@ Link everything together :
 3. give these toolsInterfaces to an Interactor structs so they respect the interacterInterface
 
 ## Demo :
-build mains/tripper.go
-and try http://localhost:8090/order?id=12
-
-edit infra.ServerSetup.Router in src/mains/tripper.go and pass it to "gin" or "http" to use a router or another !
+run main_test.go and read the logs
