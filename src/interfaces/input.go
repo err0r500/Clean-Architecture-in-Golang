@@ -20,7 +20,7 @@ func (i InputLayer1) CallUseCases() {
 	log.Print("from the inputLayer : I received the response from UC 1, I can format it to another format (think json for example)")
 
 	//here, the custom type "Age" defined only at the interface level is passed to the useCase layer,
-	//it will simply carry it without knowing what it is
+	//this layer will simply carry it without knowing what it is
 	log.Print("from the inputLayer : I received another raw request so I will format it in order to call UseCase 2")
 	i.UseCase2(Age(12))
 	log.Print("from the inputLayer : I received the response from UC 2, I can format it too")

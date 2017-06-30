@@ -9,7 +9,7 @@ import (
 // RealChecker empty struct implementing the domain.UserAddressChecker interface
 type RealChecker struct{}
 
-// Check would do a real check
+// CheckAddress checks the Address of a user
 func (d RealChecker) CheckAddress(e domain.User, params interface{}) bool {
 	log.Print("RealChecker Called ")
 	return true

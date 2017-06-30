@@ -1,4 +1,4 @@
 package main
 
-//run the main_test file
+//Please, run the main_test file instead
 func main() {}
