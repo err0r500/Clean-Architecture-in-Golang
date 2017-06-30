@@ -6,7 +6,9 @@ import (
 	"github.com/err0r500/cleanArchitectureGolang/src/domain"
 )
 
-//User : a more complete user with all app-specific details
+// User : a more complete user with all app-specific details
+// it should contains all the field that may be sent to a presentationnal layer (http response for example)
+// a simple Format() can then be implemented to fileter out or alter the properties name/values
 type User struct {
 	domain.User
 	ID   int
@@ -20,13 +22,13 @@ func NewFlowUser(dU domain.User, id int, name string) User {
 
 //UserInteractor : all the interfaces needed in order to execute all the useCases
 type UserInteractor struct {
-	WeakCheck      domain.UserChecker
-	StrongCheck    domain.UserChecker
+	WeakCheck      domain.UserAddressChecker
+	StrongCheck    domain.UserAddressChecker
 	UserReadWriter UserReadWriter
 }
 
 //NewUserInteractor : constructor to be sure everything is well initialized
-func NewUserInteractor(wC, sC domain.UserChecker, uRW UserReadWriter) UserInteractor {
+func NewUserInteractor(wC, sC domain.UserAddressChecker, uRW UserReadWriter) UserInteractor {
 	return UserInteractor{wC, sC, uRW}
 }
 
@@ -45,7 +47,7 @@ func (t UserInteractor) UseCase1(params interface{}) {
 	log.Print("start of UC 1")
 	domainUser := domain.NewUser("hehehe", t.WeakCheck)
 	fU := NewFlowUser(domainUser, 112345678, "userName")
-	fU.User.Check(fU.User, nil)
+	fU.User.CheckAddress(fU.User, nil)
 	log.Print("end of UC 1")
 }
 
@@ -55,8 +57,8 @@ func (t UserInteractor) UseCase2(params interface{}) {
 	//GetDetails receives params potentially unkown at "useCases" level
 	// and return a usecases.User according to that
 	fU := t.UserReadWriter.GetDetails(params)
-	fU.User.UserChecker = t.StrongCheck
-	fU.User.Check(fU.User, nil)
+	fU.User.UserAddressChecker = t.StrongCheck
+	fU.User.CheckAddress(fU.User, nil)
 
 	log.Print("end of UC 2")
 }

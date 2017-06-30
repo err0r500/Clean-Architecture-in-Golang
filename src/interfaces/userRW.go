@@ -39,7 +39,9 @@ func (dRW RealUserReadWriter) GetDetails(i interface{}) useCases.User {
 
 func (RealUserReadWriter) getUserByName(n string) RWUser {
 	log.Print("realUserRW received a string : implement searchByName")
-	return RWUser{}
+	rWu := RWUser{}
+	rWu.UsecaseUser.Address = "address fetched somewhere"
+	return rWu
 }
 
 func (RealUserReadWriter) getUserByID(id int) RWUser {
