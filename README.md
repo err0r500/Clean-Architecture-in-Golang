@@ -144,7 +144,8 @@ func (wH WebHandler) GetUser (c *gin.Engine){
   rawUseCaseUser := wH.userInteractor.GetUserDetailsUseCase(safeInt)
   return GetUserResponseFormatter(rawUseCaseUser)
 
-}```
+}
+```
 
 
 - Great ! Now we're in our USE_CASE() !
