@@ -5,9 +5,10 @@
 
 How ? Dependencies always go in the opposite direction of Abstraction
 
-In other words : Dependencies go ***strictly*** from the bottom up : **Infra** (server Setup and stuff like that) **depends on** **Interfaces** (external libs, Db queries, output formatting) **depends on** **Usecases** (pure logic) **depends on** **Domain** (pure Business & eternal rules))
+In other words : Dependencies go ***strictly*** from the bottom up : **Infra** (server Setup and stuff like that) **can depend on** **Interfaces** (external libs, Db queries, output formatting) **can depend on** **Usecases** (pure logic) **can depend on** **Domain** (pure Business & eternal rules))
 
-References to 3rd party libs & frameworks are then forbidden in layers above "Interfaces" : no `import "github.com/..."` things in your useCases or Domain!
+- References to 3rd party libs & frameworks are then forbidden in layers above "Interfaces" : no `import "github.com/..."` things in your useCases or Domain!
+- You can skip steps in this dependency chain : Interface layer can of course import from Domain layer.
 
 ### 1 - Domain
 #### Purpose
