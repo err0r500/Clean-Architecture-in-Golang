@@ -111,25 +111,69 @@ Testing the use cases is done by implementing mocked interfaces. DO NOT call a D
 ### 3 - Interfaces
 ***Gateways to the outter world*** : That's where you actually define the **toolMethods()** in order to group them in the ***ToolInterfaces*** needed by the INTERACTOR (with tech specific code) along with their mocked versions for the test of the UseCase Layer
 
-#### Example
-
-*SO... WHAT DO I DO ?*
 - route User Interactions to USE_CASES()
-- adapt 3rd-party libs to USE_CASES()
+- adapt 3rd-party libs to make USE_CASES() "happen" (ie actually save where you want when **Save()** is called)
   - declare new structs in order to map the Domain or UseCase structs with their "framework specific" version (gorm, json...)
   - do the same for the communication in the opposite direction (remember the **ToUseCaseUser()** above)
 
-#### Tests
+#### Example
+On my web API, when the GET /user/:id route is called, it should return a json formatted version of the key user_:id in my Redis DB
 
+*SO... WHAT DO I DO ?*
+- Set the ***ToolInterface*** that will handle the route on your web server (ie setup a Gin Router)
+- Declare WebHandler : a struct embedding the USER_INTERACTOR
+- for the route GET /user/:id, call the corresponding method WebHandler.GetUser(:id)
+- This method will contain our USE_CASE() : userInteractor.GetUserDetailsUseCase(id int)
+
+A few lines of (pseudo) code may be clearer :
+
+```
+type WebHandler struct {
+  userInteractor USER_INTERACTOR
+}
+
+func (wH WebHandler) GetUser (c *gin.Engine){
+
+  // do some checks to be sure the USE_CASE will receive
+  // what it expects, otherwise return directly an error
+  safeInt, err := checkThisParamThenReturnAnIntIfSafe(c.params.id)
+  if err != nil {
+    return
+  }
+
+  rawUseCaseUser := wH.userInteractor.GetUserDetailsUseCase(safeInt)
+  return GetUserResponseFormatter(rawUseCaseUser)
+
+}```
+
+
+- Great ! Now we're in our USE_CASE() !
+- it will call a getUser(id int) method, implemented somewhere with a redis client
+- then it return a useCase.User
+- (we're now back in WebHandler.GetUser) we can then eventually pass it to another method for filtering out the properties unexpected in the response, format it to json for example and finally return !  
+
+#### Tests
+If you test DB queries, do it on localhost !
 
 ### 4 - Infra
-Technical setup (boilerplate code) that will allow code written at Interfaces level to actually operate
-(not implemented in this minimal example, think about CORS setup for your http router and this kind of stuff)
+*( This layer is not implemented in this minimal example )*
+
+***Low level technical setup*** : this part will allow code written at Interfaces level to actually operate.
+
+##### Examples
+- Set the IP address and Port Number in order to connect to the Databases
+- Implement methods in order to fetch needed credentials
+- Setup your http CORS policy
+
+##### Tests
+These tests may not automatic but may instead be methods called in the main() at startup so the execution stops if one of them throws an error.
+- Check if you're really able to connect ( just start the connection to the DB to check there's no error )
+- Check if you're able to fetch your credentials
 
 ### 5 - Main
 See the main_test.go file.
 That's where everything is linked together :
-- call if needed code in Infra (not shown here)
+- call if needed code in Infra
 
 - give the result to the toolsInterfaces you need
 
