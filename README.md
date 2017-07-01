@@ -1,30 +1,35 @@
-# A Clean Architecture in Golang
+# Clean Architecture
 
-## Clean Architecture :
 > The purpose of this architecture is to be as flexible as possible in order to develop a project as quickly as possible and to maintain this speed during the whole development lifespan, whatever its size and the changes that will have to be done, for whatever reason.
 
 How ? Dependencies always go in the opposite direction of Abstraction.
 
 Where does it come from ? **Robert Cecil Martin** (aka Uncle Bob), one of the few guys who, one day, wrote the Agile manifesto ! ... In fact, this architecture is the survival kit of the developper pushed in the Agile world as seen by product owners !
 
-### The 4 layers of a typical Clean Architecture
+# The 4 layers of a typical Clean Architecture
 
 - **Domain** : pure Business & eternal rules
 - **Use cases** : pure logic
 - **Interfaces** : external libs, DB queries, presentation to Use cases layer, output formatting
 - **Infra** : server Setup and stuff like that
 
-Dependencies go ***strictly*** from the bottom up : Infra **can depend on** Interfaces **can depend on** Usecases **can depend on** Domain
+Dependencies go ***strictly*** from the bottom up : Infra **can depend on** Interfaces **can depend on** Usecases **can depend on** Domain.
 
-- References to 3rd party libs & frameworks are then forbidden in layers above "Interfaces" : no `import "github.com/..."` things in your useCases or Domain!
+- While the dependencies point in the same direction, the execution flow moves from a layer to another, in any direction.
+- References to 3rd party libs & frameworks are forbidden in layers above "Interfaces" : no `import "github.com/..."` things in your useCases or Domain!
 - You can skip steps in this dependency chain : Interface layer can of course import from Domain layer (but the other direction is forbidden)
 
-### 1 - Domain
-***Pure business & eternal rules*** : think of the things that will be still relevant if the project was operated in a completely different context (you're building a website backend, what will stay intact if it was replaced by a call center ?).
+### Demo :
+run main_test.go and read the logs to see
+- how the execution flows from a layer to another while the dependency inversion rule is strictly observed.
+- how an Interface can be substituted to another allowing us to plug IN/OUT dependencies
 
-The product owner must able to tell you what to put in here :)
+# 1 - Domain
+>***Pure business & eternal rules*** : think of the things that will be still relevant if the project was operated in a completely different context (you're building a website backend, what will stay intact if it was replaced by a call center ?).
 
-#### Example
+>The product owner must able to tell you what to put in here :)
+
+## Example
 - I've got users
 - they have a name
 - this name can't be a set of numbers
@@ -36,17 +41,17 @@ The product owner must able to tell you what to put in here :)
 	- it's easy -> define it directly in Domain
 	- you need a lib *[personal remark : Really ? Sounds pretty bad ! ]* -> declare the interface containing the method in Domain, you'll define how it actually works in Interfaces  
 
-#### Tests
+## Tests
 - test the consistency of your rules.
   - *Example :* you defined the min & max for something (say, a price). Check that the min is not superior to the max (remember that the product owner may play with this part of your code :) ).
 - test the methods defined here :
   - *Example :* if you defined the UpdateUserName() method here, check that it actually does its job.
 
-### 2 - Use Cases
-***Pure Logic*** : This layer knows an outer world exists but absolutely doesn't care about how it looks like. It just does its job without caring about how it gets done.
+# 2 - Use Cases
+>***Pure Logic*** : This layer knows an outer world exists but absolutely doesn't care about how it looks like. It just does its job without caring about how it gets done.
 
-#### Examples
-##### #1
+## Examples
+#### #1
 USER_INTERACTOR.*CREATE_AN_ACCOUNT (name, password)* {
 - create a new useCase.User
 - use ***UserNameUpdater*** to **update(name)** useCase.User.Name with the name received
@@ -56,7 +61,7 @@ USER_INTERACTOR.*CREATE_AN_ACCOUNT (name, password)* {
 }
 
 ---
-##### #2
+#### #2
 USER_INTERACTOR.*DELETE_AN_ACCOUNT (name, password)* {
 - use ***UserReadWriterLive*** to **get(name)** the useCase.User it finds with this name
 - use ***PasswordChecker*** to check if the password received **isTheSameAs(password)** the password of the useCase.User returned by ***UserReadWriterLive***
@@ -99,7 +104,7 @@ OK, you've got a name & password (the params of the USE_CASE(), we'll see later 
 - ... some time passes and the product owner says it would be cool to keep track of these deleted users but well separated from the "live" ones. No problem, we simply add a line to our use case and
   - ask for a **createDeleted()** method but we'll use another interface, ***UserReadWriterHistory***. This way, we don't care where and how it's actually saved : another table in the same DB, another DB, another type of DB, a file system... we simple don't care, our use case is finished !
 
-#### Tests
+## Tests
 Testing the use cases is done by implementing mocked interfaces. DO NOT call a DB or anything outside your own code for your tests (at this layer)
 
 - Test the logic of your useCases, try to detect edge cases
@@ -109,7 +114,7 @@ Testing the use cases is done by implementing mocked interfaces. DO NOT call a D
 - Test your inconsistency detection : your use case will receive its params from the Interfaces layer too, do you check that it doesn't make your code act a funny way ?
     - *Example :*  You've got a SEND_ORDER(customerID, cartID) use case, do you check that the customerID retrieved with your (perfectly working) **getCustomerDetails(cartID)** method is the same as the one your use case received as paramater ?
 
-### 3 - Interfaces
+# 3 - Interfaces
 ***Gateways to the outer world*** : That's where you actually define the **toolMethods()** in order to group them in the ***ToolInterfaces*** needed by the INTERACTOR (with tech specific code) along with their mocked versions for the test of the UseCase Layer
 
 - route User Interactions to USE_CASES()
@@ -117,7 +122,7 @@ Testing the use cases is done by implementing mocked interfaces. DO NOT call a D
   - declare new structs in order to map the Domain or UseCase structs with their "framework specific" version (gorm, json...)
   - do the same for the communication in the opposite direction (remember the **ToUseCaseUser()** above)
 
-#### Example
+## Example
 On my web API, when the GET /user/:id route is called, it should return a json formatted version of the key user_:id in my Redis DB
 
 *SO... WHAT DO I DO ?*
@@ -154,32 +159,28 @@ func (wH WebHandler) GetUser (c *gin.Engine){
 - then it return a useCase.User
 - (we're now back in WebHandler.GetUser) we can then eventually pass it to another method for filtering out the properties unexpected in the response, format it to json for example and finally return !  
 
-#### Tests
+## Tests
 If you test DB queries, do it on localhost !
 
-### 4 - Infra
+# 4 - Infra
 *( This layer is not implemented in this minimal example )*
 
 ***Low level technical setup*** : this part will allow code written at Interfaces layer to actually operate.
 
-##### Examples
+## Examples
 - Set the IP address and Port Number in order to connect to the Databases (use this for your Interfaces layer tests)
 - Implement methods in order to fetch needed credentials
 - Setup your http CORS policy
 
-##### Tests
+## Tests
 These tests may not automatic but may instead be methods called in the main() at startup so the execution stops if one of them throws an error.
 - Check if you're really able to connect ( just ping the DB to check there's no error )
 - Check if you're able to fetch your credentials
 
-### 5 - Main
+# 5 - Main
 ***The place where everything is plugged in*** :
 - call if needed code in Infra
 
 - give the result to the toolsInterfaces you need
 
 - give these toolsInterfaces to an Interactor struct that will have everything in hand in order to execute the use cases
-
-
-## Demo :
-run main_test.go and read the logs
