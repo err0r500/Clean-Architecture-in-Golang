@@ -24,14 +24,14 @@ The product owner must able to tell you what to put in here :)
 *SO... WHAT DO I DO ?*
 - declare the User struct with a name property
 - about the UpdateUserName() method, you've got 2 options :
-	1. it's easy -> define it directly in Domain
-	2. you need a lib *[personal remark : Really ? Sounds pretty bad ! ]* -> declare the interface containing the method in Domain, you'll define how it actually works in Interfaces  
+	- it's easy -> define it directly in Domain
+	- you need a lib *[personal remark : Really ? Sounds pretty bad ! ]* -> declare the interface containing the method in Domain, you'll define how it actually works in Interfaces  
 
 #### Tests
 - test the consistency of your rules.
-  - *for example :* you defined the min & max for something (say, a price). Check that the min is not superior to the max (remember that the product owner may play with this part of your code :) ).
+  - *Example :* you defined the min & max for something (say, a price). Check that the min is not superior to the max (remember that the product owner may play with this part of your code :) ).
 - test the methods defined here :
-  - *for example :* if you defined the UpdateUserName() method here, check that it actually does its job.
+  - *Example :* if you defined the UpdateUserName() method here, check that it actually does its job.
 
 ### 2 - Use Cases
 ***Pure Logic*** : This layer knows an outter world exists but absolutely doesn't care about how it looks like. It just does its job without caring about how it gets done.
@@ -39,20 +39,20 @@ The product owner must able to tell you what to put in here :)
 #### Examples
 ##### #1
 USER_INTERACTOR.*CREATE_AN_ACCOUNT (name, password)* {
-1. create a new useCase.User
-2. use ***UserNameUpdater*** to **update(name)** useCase.User.Name with the name received
-3. if it's fine, set also the useCase.User.Password with the password received
-4. use ***UserReadWriter*** to **save(user)** useCase.User
+- create a new useCase.User
+- use ***UserNameUpdater*** to **update(name)** useCase.User.Name with the name received
+- if it's fine, set also the useCase.User.Password with the password received
+- use ***UserReadWriter*** to **save(user)** useCase.User
 
 }
 
 ---
 ##### #2
 USER_INTERACTOR.*DELETE_AN_ACCOUNT (name, password)* {
-1. use ***UserReadWriterLive*** to **get(name)** the useCase.User it finds with this name
-2. use ***PasswordChecker*** to check if the password received **isTheSameAs(password)** the password of the useCase.User returned by ***UserReadWriterLive***
-3. if it's the same, use ***UserReadWriterLive*** to **delete(user)** the User
-3. use ***UserReadWriterHistory*** to **createDeleted(user)** the User
+- use ***UserReadWriterLive*** to **get(name)** the useCase.User it finds with this name
+- use ***PasswordChecker*** to check if the password received **isTheSameAs(password)** the password of the useCase.User returned by ***UserReadWriterLive***
+- if it's the same, use ***UserReadWriterLive*** to **delete(user)** the User
+- use ***UserReadWriterHistory*** to **createDeleted(user)** the User
 
 }
 
@@ -75,15 +75,15 @@ What do you know ? The USE_CASE() ! Let's take the second one, it's more complic
 
 OK, you've got a name & password (the params of the USE_CASE(), we'll see later how you get them) and you would like to delete the user account if the passwords matches. We'll declare the set of methods we'll need at the moment we encounter them and group them in interfaces
 
-1. If the accound has to be deleted, it means it relies somewhere. Where ? You don't care ! ... but whatever this place is, you'll have to interact with it.
+- If the accound has to be deleted, it means it relies somewhere. Where ? You don't care ! ... but whatever this place is, you'll have to interact with it.
   - Say, we need **get()**, let's put it in something (an interface) called ***UserReadWriterLive***.
-2. ... But wait ! There's some chance that in the outter world, the data don't look quite the same as ours :
+- ... But wait ! There's some chance that in the outter world, the data don't look quite the same as ours :
   - Just to be sure, we'll ask for a **ToUseCaseUser()** method. We won't call it, ever, but it's mandatory for anything wanting to talk with us !
-3. Let's move on ! We now need to check if passwords match. For the sake of the example, we won't check that directly in the use case. It may not be related to Users only :
+- Let's move on ! We now need to check if passwords match. For the sake of the example, we won't check that directly in the use case. It may not be related to Users only :
   - Let's ask for an **isTheSameAs()** method and put it somewhere else : ***PasswordChecker***
-4. We'll also have to delete the user :
+- We'll also have to delete the user :
   - let's ask for a **delete()**, we'll mostly likely have to interact with the same place as where we got the user from, so let's put **delete()** in ***UserReadWriterLive*** too.
-5. Finally, we group all these ***ToolInterfaces*** in a single structure : the USER_INTERACTOR.
+- Finally, we group all these ***ToolInterfaces*** in a single structure : the USER_INTERACTOR.
   - We'll wire everything up when we construct it (most likely in the main file) but this way, when any USER_INTERACTOR.*USE_CASE()* is called, it will find an implementation of all the **toolMethods()** it needs !
 
 
@@ -91,8 +91,12 @@ OK, you've got a name & password (the params of the USE_CASE(), we'll see later 
   - ask for a **createDeleted()** method but we'll use another interface, ***UserReadWriterHistory***. This way, we don't care where and how it's actually saved : another table in the same DB, another DB, another type of DB, a file system... we simple don't care, our use case is finished !
 
 #### Tests
-
-... hmmm I don't know what to test here ...
+- Test the logic of your useCases, try to detect edge cases
+  - *Example :* vary the inputs and verify the execution flows through your code the way it's supposed to.
+- Test the error detection of the results coming from the Interfaces layer (especially those not throwing any error ! )
+  - *Example :* say your **get()** method returns an empty User with no error, would it be fine for you ? You don't know this code, don't trust it !
+- Test your inconsistency detection : your use case will receive its params from the Interfaces layer too, do you check that it doesn't make your code act a funny way ?
+    - *Example :*  You've got a SEND_ORDER(customerID, cartID) use case, do you check that the customerID retrieved with your (perfectly working) **getCustomerDetails(cartID)** method is the same as the one your use case received as paramater ?
 
 ### 3 - Interfaces
 Implementation of the links with the outter world
@@ -106,11 +110,11 @@ Technical setup (boilerplate code) that will allow code written at Interfaces le
 ### 5 - Main
 See the main_test.go file.
 That's where everything is linked together :
-1. call if needed code in Infra (not shown here)
+- call if needed code in Infra (not shown here)
 
-2. give the result to the toolsInterfaces you need
+- give the result to the toolsInterfaces you need
 
-3. give these toolsInterfaces to an Interactor struct that will have everything in hand in order to execute the use cases
+- give these toolsInterfaces to an Interactor struct that will have everything in hand in order to execute the use cases
 
 
 ## Demo :

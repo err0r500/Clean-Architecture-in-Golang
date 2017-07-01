@@ -7,11 +7,11 @@ import (
 	"github.com/err0r500/cleanArchitectureGolang/src/domain"
 )
 
-// I think it's a good idea to keep the mocked interface at the level where they are declared
-// They'll be actually implemented at the interfaces layer
+// DummyChecker is just here to hold a "version" of the UserAddressChecker interface
+// declare in the domain layer
 type DummyChecker struct{}
 
-// Check : checks if the User Address is valid
+// CheckAddress : checks if the User Address is valid
 func (d DummyChecker) CheckAddress(e domain.User) bool {
 	log.Print("dummyAddressCheck of : " + e.Address)
 	return true
