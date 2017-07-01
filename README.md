@@ -5,7 +5,14 @@
 
 How ? Dependencies always go in the opposite direction of Abstraction
 
-In other words : Dependencies go ***strictly*** from the bottom up : **Infra** (server Setup and stuff like that) **can depend on** **Interfaces** (external libs, Db queries, output formatting) **can depend on** **Usecases** (pure logic) **can depend on** **Domain** (pure Business & eternal rules))
+### 4-layered Architecture
+
+- **Domain** : pure Business & eternal rules
+- **Use cases** : pure logic
+- **Interfaces** : external libs, DB queries, presentation to Use cases layer, output formatting
+- **Infra** : server Setup and stuff like that
+
+Dependencies go ***strictly*** from the bottom up : Infra **can depend on** Interfaces **can depend on** Usecases **can depend on** Domain
 
 - References to 3rd party libs & frameworks are then forbidden in layers above "Interfaces" : no `import "github.com/..."` things in your useCases or Domain!
 - You can skip steps in this dependency chain : Interface layer can of course import from Domain layer.
@@ -92,6 +99,8 @@ OK, you've got a name & password (the params of the USE_CASE(), we'll see later 
   - ask for a **createDeleted()** method but we'll use another interface, ***UserReadWriterHistory***. This way, we don't care where and how it's actually saved : another table in the same DB, another DB, another type of DB, a file system... we simple don't care, our use case is finished !
 
 #### Tests
+Testing the use cases is done by implementing mocked interfaces. DO NOT call a DB or anything outside your own code for your tests (at this layer)
+
 - Test the logic of your useCases, try to detect edge cases
   - *Example :* vary the inputs and verify the execution flows through your code the way it's supposed to.
 - Test the error detection of the results coming from the Interfaces layer (especially those not throwing any error ! )
@@ -100,9 +109,18 @@ OK, you've got a name & password (the params of the USE_CASE(), we'll see later 
     - *Example :*  You've got a SEND_ORDER(customerID, cartID) use case, do you check that the customerID retrieved with your (perfectly working) **getCustomerDetails(cartID)** method is the same as the one your use case received as paramater ?
 
 ### 3 - Interfaces
-Implementation of the links with the outter world
-- **Define** here the "tool Interfaces". That's where you write the tech specific code (use 3rd-party libs), declare new structs in order to map the Domain or UseCase structs with another API (gorm, json...) (and in the opposite direction)
-- **Declare** the structs that will hold an INTERACTOR (whose methods can be called so the logic in usecases is executed)
+***Gateways to the outter world*** : That's where you actually define the **toolMethods()** in order to group them in the ***ToolInterfaces*** needed by the INTERACTOR (with tech specific code) along with their mocked versions for the test of the UseCase Layer
+
+#### Example
+
+*SO... WHAT DO I DO ?*
+- route User Interactions to USE_CASES()
+- adapt 3rd-party libs to USE_CASES()
+  - declare new structs in order to map the Domain or UseCase structs with their "framework specific" version (gorm, json...)
+  - do the same for the communication in the opposite direction (remember the **ToUseCaseUser()** above)
+
+#### Tests
+
 
 ### 4 - Infra
 Technical setup (boilerplate code) that will allow code written at Interfaces level to actually operate
