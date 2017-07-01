@@ -16,9 +16,9 @@ func (i InputLayer1) CallUseCases() {
 	// usually some logic would happen here to trigger a useCase or another
 	// (ie : if it was an http router, it would be a different useCase for each route)
 	log.Print("from the inputLayer : I received a raw request and will format it in order to call UseCase 1")
-	i.UseCase1("aze")
+	i.UseCase1("address set in Input in Interfaces Layer")
 	log.Print("from the inputLayer : I received the response from UC 1, I can format it to another format (think json for example)")
-
+	log.Print("===")
 	//here, the custom type "Age" defined only at the interface level is passed to the useCase layer,
 	//this layer will simply carry it without knowing what it is
 	log.Print("from the inputLayer : I received another raw request so I will format it in order to call UseCase 2")

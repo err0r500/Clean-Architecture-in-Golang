@@ -7,7 +7,9 @@ import (
 )
 
 // RealUserReadWriter implementing the UserReadWriter interface
-type RealUserReadWriter struct{}
+type RealUserReadWriter struct {
+	ucUser useCases.User
+}
 
 // RWUser : a tech/framework specific version of User
 type RWUser struct {
@@ -17,24 +19,25 @@ type RWUser struct {
 }
 
 // ToUseCaseUser helper in order to return a useCases.User to useCases level
-func (rwU RWUser) ToUseCaseUser() useCases.User {
-	log.Print("from RealUserRW : I use a special type of User but I convert it back to ucUser")
-	return rwU.UsecaseUser
+func (rURW RealUserReadWriter) ToUseCaseUser() useCases.User {
+	log.Print("from RealUserRW : I use a special type of User but I can convert it back to ucUser")
+	return rURW.ucUser
 }
 
 //GetDetails : allows to search by something the
-func (dRW RealUserReadWriter) GetDetails(i interface{}) useCases.User {
+func (rURW RealUserReadWriter) GetDetails(i interface{}) useCases.User {
 	rwU := RWUser{}
 	switch v := i.(type) {
 	case int:
-		rwU = dRW.getUserByID(v)
+		rwU = rURW.getUserByID(v)
 	case string:
-		rwU = dRW.getUserByName(v)
+		rwU = rURW.getUserByName(v)
 	case Age:
-		rwU = dRW.getUserByAge(v)
+		rwU = rURW.getUserByAge(v)
 	default:
 	}
-	return rwU.ToUseCaseUser()
+	rURW.ucUser = rwU.UsecaseUser
+	return rURW.ToUseCaseUser()
 }
 
 func (RealUserReadWriter) getUserByName(n string) RWUser {
@@ -46,10 +49,14 @@ func (RealUserReadWriter) getUserByName(n string) RWUser {
 
 func (RealUserReadWriter) getUserByID(id int) RWUser {
 	log.Print("realUserRW received an int : implement searchByID")
-	return RWUser{}
+	rWu := RWUser{}
+	rWu.UsecaseUser.Address = "address fetched somewhere else"
+	return rWu
 }
 
 func (RealUserReadWriter) getUserByAge(id Age) RWUser {
 	log.Print("realUserRW received an Age ! -> a UseCase triggered a search by Age while it doesn't know this type !")
-	return RWUser{}
+	rWu := RWUser{}
+	rWu.UsecaseUser.Address = "address fetched somewhere else (again)"
+	return rWu
 }

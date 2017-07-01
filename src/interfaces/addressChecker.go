@@ -10,7 +10,7 @@ import (
 type RealChecker struct{}
 
 // CheckAddress checks the Address of a user
-func (d RealChecker) CheckAddress(e domain.User, params interface{}) bool {
-	log.Print("RealChecker Called ")
+func (d RealChecker) CheckAddress(e domain.User) bool {
+	log.Print("realAddressCheck of : " + e.Address)
 	return true
 }
