@@ -37,20 +37,22 @@ The product owner must able to tell you what to put in here :)
 ***Pure Logic*** : This layer knows an outter world exists but absolutely doesn't care about how it looks like. It just does its job without caring about how it gets done.
 
 #### Examples
+##### #1
 USER_INTERACTOR.*CREATE_AN_ACCOUNT (name, password)* {
-  1. create a new useCase.User
-  - use ***UserNameUpdater*** to **update(name)** useCase.User.Name with the name received
-  - if it's fine, set also the useCase.User.Password with the password received
-  - use ***UserReadWriter*** to **save(user)** useCase.User
+1. create a new useCase.User
+2. use ***UserNameUpdater*** to **update(name)** useCase.User.Name with the name received
+3. if it's fine, set also the useCase.User.Password with the password received
+4. use ***UserReadWriter*** to **save(user)** useCase.User
 
 }
 
 ---
+##### #2
 USER_INTERACTOR.*DELETE_AN_ACCOUNT (name, password)* {
 1. use ***UserReadWriterLive*** to **get(name)** the useCase.User it finds with this name
-- use ***PasswordChecker*** to check if the password received **isTheSameAs(password)** the password of the useCase.User returned by ***UserReadWriterLive***
-- if it's the same, use ***UserReadWriterLive*** to **delete(user)** the User
-- use ***UserReadWriterHistory*** to **createDeleted(user)** the User
+2. use ***PasswordChecker*** to check if the password received **isTheSameAs(password)** the password of the useCase.User returned by ***UserReadWriterLive***
+3. if it's the same, use ***UserReadWriterLive*** to **delete(user)** the User
+3. use ***UserReadWriterHistory*** to **createDeleted(user)** the User
 
 }
 
@@ -58,7 +60,7 @@ USER_INTERACTOR.*DELETE_AN_ACCOUNT (name, password)* {
 
 ***A few naming conventions first :***
 - CAPS -> the INTERACTOR
-- CAPS and italic -> a *USE_CASE()*
+- CAPS, italic with parenthesis -> a *USE_CASE()*
 - bold camel-cased -> a ***ToolInterface***
 - bold with parenthesis -> a **toolMethod()**
 
@@ -71,29 +73,31 @@ USER_INTERACTOR.*DELETE_AN_ACCOUNT (name, password)* {
 
 What do you know ? The USE_CASE() ! Let's take the second one, it's more complicated ! (in fact I even overcomplicated it just to show how this architecture is flexible) :)
 
-OK, you've got a name & password (the params of the USE_CASE(), we'll see later how you get them) and would like to delete the user account if the passwords matches. We'll declare the set of methods we'll need at the moment we encounter them and group them in interfaces
+OK, you've got a name & password (the params of the USE_CASE(), we'll see later how you get them) and you would like to delete the user account if the passwords matches. We'll declare the set of methods we'll need at the moment we encounter them and group them in interfaces
 
 1. If the accound has to be deleted, it means it relies somewhere. Where ? You don't care ! ... but whatever this place is, you'll have to interact with it.
   - Say, we need **get()**, let's put it in something (an interface) called ***UserReadWriterLive***.
-- ... But wait, there's some chances that in the outter world, the data and especially the user don't look quite the same as ours.
-  - Just to be sure, we'll ask for a **ToUseCaseUser()** method. We won't call it, ever, but it has to have it if it wants to talk with us !
-- Let's move on ! We now need to check if passwords matches. For the sake of the example, we won't check that directly in the use case. It may not be related to Users only.
+2. ... But wait ! There's some chance that in the outter world, the data don't look quite the same as ours :
+  - Just to be sure, we'll ask for a **ToUseCaseUser()** method. We won't call it, ever, but it's mandatory for anything wanting to talk with us !
+3. Let's move on ! We now need to check if passwords match. For the sake of the example, we won't check that directly in the use case. It may not be related to Users only :
   - Let's ask for an **isTheSameAs()** method and put it somewhere else : ***PasswordChecker***
-- We'll also have to delete the user
+4. We'll also have to delete the user :
   - let's ask for a **delete()**, we'll mostly likely have to interact with the same place as where we got the user from, so let's put **delete()** in ***UserReadWriterLive*** too.
-- Finally, we group all these ***ToolInterfaces*** in a single structure : the USER_INTERACTOR. We'll wire everything up when we construct it (most likely in the main file) but this way, when any USER_INTERACTOR.*USE_CASE()* is called, it will find an implementation of all the **toolMethods()** it needs !
+5. Finally, we group all these ***ToolInterfaces*** in a single structure : the USER_INTERACTOR.
+  - We'll wire everything up when we construct it (most likely in the main file) but this way, when any USER_INTERACTOR.*USE_CASE()* is called, it will find an implementation of all the **toolMethods()** it needs !
+
 
 - ... some time passes and the product owner says it would be cool to keep track of these deleted users but well separated from the "live" ones. No problem, we simply add a line to our use case and
-  - ask for a **createDeleted()** method but we'll use another interface : ***UserReadWriterHistory***. This way, we don't care where and how it's actually saved : another table in the same DB, another DB, another type of DB, a file system... we simple don't care, our use case is finished !
+  - ask for a **createDeleted()** method but we'll use another interface, ***UserReadWriterHistory***. This way, we don't care where and how it's actually saved : another table in the same DB, another DB, another type of DB, a file system... we simple don't care, our use case is finished !
 
 #### Tests
 
 ... hmmm I don't know what to test here ...
 
 ### 3 - Interfaces
-Links with the outter world
-- **Define** here the "tool Interfaces". That's where you write the tech specific code (use 3rd-party libs), declare new structs in order to map the Domain or Flow structs with another API (gorm, json...) (and in the opposite direction)
-- **Declare** the structs (usually empty) that will hold an "Interacter" (whose methods can be called so the logic in usecases is executed)
+Implementation of the links with the outter world
+- **Define** here the "tool Interfaces". That's where you write the tech specific code (use 3rd-party libs), declare new structs in order to map the Domain or UseCase structs with another API (gorm, json...) (and in the opposite direction)
+- **Declare** the structs that will hold an INTERACTOR (whose methods can be called so the logic in usecases is executed)
 
 ### 4 - Infra
 Technical setup (boilerplate code) that will allow code written at Interfaces level to actually operate
@@ -102,14 +106,11 @@ Technical setup (boilerplate code) that will allow code written at Interfaces le
 ### 5 - Main
 See the main_test.go file.
 That's where everything is linked together :
-1. call if needed code in Infra
+1. call if needed code in Infra (not shown here)
 
 2. give the result to the toolsInterfaces you need
 
 3. give these toolsInterfaces to an Interactor struct that will have everything in hand in order to execute the use cases
-
-4. (just so you can figure out everything : there's usually an input layer that will receive request from the outside and use the Interactor in order to trigger its methods )
-
 
 
 ## Demo :
