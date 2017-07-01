@@ -1,11 +1,32 @@
 # Example of Clean Architecture in Golang
 
 ## Clean Architecture :
-Dependencies go ***strictly*** from bottom to top (i.e. infra -> interfaces -> usecases -> domain)
+Dependencies always go in the opposite direction of Abstraction
+
+So, ***strictly*** from bottom to top (i.e. Infra -> Interfaces -> Usecases -> Domain)
 3rd party libs are forbidden above "Interfaces" level.
 
 ### 1 - Domain
-*Pure business* : things still relevant if the project was operated by phone
+#### Purpose
+**Pure business** : think of the things that will be still relevant if the project was operated in a completely different context (you're building a website backend, what will stay intact if it was replaced by a call center ?)
+
+#### Example
+- I've got users
+- they have a name
+- this name can't be a set of numbers
+	- I need a way to update the name and stay assured it always respects this rule
+
+*TODO :*
+- declare the User struct with a name property
+- about the UpdateUserName() method, you've got 2 options :
+	1. it's easy -> define it directly in Domain
+	2. you need a lib *[personal remark : Really ? Sounds pretty bad ! ]* -> declare the interface containing the method in Domain, you'll define how it actually works in Interfaces  
+
+#### Tests
+- test the consistency of your rules.
+  - *for example :* you defined the min & max for something (say, a price) check that the min value you set is not superior to the max
+- test the methods defined here :
+  - *for example :* if you defined the UpdateUserName() method here, check that it actually does its job.
 
 ### 2 - Use Cases
 *Use cases* : what happens in a tech agnostic way. For example : "Save" (doesn't care if it's in a db or in RAM or whatever)
