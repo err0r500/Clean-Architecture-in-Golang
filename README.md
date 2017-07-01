@@ -1,11 +1,13 @@
 # A Clean Architecture in Golang
 
 ## Clean Architecture :
-> The purpose of this architecture is to be as flexible as possible in order to develop as quickly as possible and to maintain this speed during the whole developpement lifespan, whatever its size and the changes that will have to be done, for whatever reason.
+> The purpose of this architecture is to be as flexible as possible in order to develop a project as quickly as possible and to maintain this speed during the whole development lifespan, whatever its size and the changes that will have to be done, for whatever reason.
 
-How ? Dependencies always go in the opposite direction of Abstraction
+How ? Dependencies always go in the opposite direction of Abstraction.
 
-### 4-layered Architecture
+Where does it come from ? **Robert Cecil Martin** (aka Uncle Bob), one of the few guys who, one day, wrote the Agile manifesto ! ... In fact, this architecture is the survival kit of the developper pushed in the Agile world as seen by product owners !
+
+### The 4 layers of a typical Clean Architecture
 
 - **Domain** : pure Business & eternal rules
 - **Use cases** : pure logic
@@ -15,10 +17,9 @@ How ? Dependencies always go in the opposite direction of Abstraction
 Dependencies go ***strictly*** from the bottom up : Infra **can depend on** Interfaces **can depend on** Usecases **can depend on** Domain
 
 - References to 3rd party libs & frameworks are then forbidden in layers above "Interfaces" : no `import "github.com/..."` things in your useCases or Domain!
-- You can skip steps in this dependency chain : Interface layer can of course import from Domain layer.
+- You can skip steps in this dependency chain : Interface layer can of course import from Domain layer (but the other direction is forbidden)
 
 ### 1 - Domain
-#### Purpose
 ***Pure business & eternal rules*** : think of the things that will be still relevant if the project was operated in a completely different context (you're building a website backend, what will stay intact if it was replaced by a call center ?).
 
 The product owner must able to tell you what to put in here :)
@@ -42,7 +43,7 @@ The product owner must able to tell you what to put in here :)
   - *Example :* if you defined the UpdateUserName() method here, check that it actually does its job.
 
 ### 2 - Use Cases
-***Pure Logic*** : This layer knows an outter world exists but absolutely doesn't care about how it looks like. It just does its job without caring about how it gets done.
+***Pure Logic*** : This layer knows an outer world exists but absolutely doesn't care about how it looks like. It just does its job without caring about how it gets done.
 
 #### Examples
 ##### #1
@@ -79,13 +80,13 @@ USER_INTERACTOR.*DELETE_AN_ACCOUNT (name, password)* {
 
 ***So... ?***
 
-What do you know ? The USE_CASE() ! Let's take the second one, it's more complicated ! (in fact I even overcomplicated it just to show how this architecture is flexible) :)
+What do you know ? The USE_CASE() ! Let's take the second one, it's more complicated ! (in fact I even over-complicated it just to show how this architecture is flexible) :)
 
 OK, you've got a name & password (the params of the USE_CASE(), we'll see later how you get them) and you would like to delete the user account if the passwords matches. We'll declare the set of methods we'll need at the moment we encounter them and group them in interfaces
 
 - If the accound has to be deleted, it means it relies somewhere. Where ? You don't care ! ... but whatever this place is, you'll have to interact with it.
   - Say, we need **get()**, let's put it in something (an interface) called ***UserReadWriterLive***.
-- ... But wait ! There's some chance that in the outter world, the data don't look quite the same as ours :
+- ... But wait ! There's some chance that in the outer world, the data don't look quite the same as ours :
   - Just to be sure, we'll ask for a **ToUseCaseUser()** method. We won't call it, ever, but it's mandatory for anything wanting to talk with us !
 - Let's move on ! We now need to check if passwords match. For the sake of the example, we won't check that directly in the use case. It may not be related to Users only :
   - Let's ask for an **isTheSameAs()** method and put it somewhere else : ***PasswordChecker***
@@ -109,7 +110,7 @@ Testing the use cases is done by implementing mocked interfaces. DO NOT call a D
     - *Example :*  You've got a SEND_ORDER(customerID, cartID) use case, do you check that the customerID retrieved with your (perfectly working) **getCustomerDetails(cartID)** method is the same as the one your use case received as paramater ?
 
 ### 3 - Interfaces
-***Gateways to the outter world*** : That's where you actually define the **toolMethods()** in order to group them in the ***ToolInterfaces*** needed by the INTERACTOR (with tech specific code) along with their mocked versions for the test of the UseCase Layer
+***Gateways to the outer world*** : That's where you actually define the **toolMethods()** in order to group them in the ***ToolInterfaces*** needed by the INTERACTOR (with tech specific code) along with their mocked versions for the test of the UseCase Layer
 
 - route User Interactions to USE_CASES()
 - adapt 3rd-party libs to make USE_CASES() "happen" (ie actually save where you want when **Save()** is called)
@@ -159,21 +160,20 @@ If you test DB queries, do it on localhost !
 ### 4 - Infra
 *( This layer is not implemented in this minimal example )*
 
-***Low level technical setup*** : this part will allow code written at Interfaces level to actually operate.
+***Low level technical setup*** : this part will allow code written at Interfaces layer to actually operate.
 
 ##### Examples
-- Set the IP address and Port Number in order to connect to the Databases
+- Set the IP address and Port Number in order to connect to the Databases (use this for your Interfaces layer tests)
 - Implement methods in order to fetch needed credentials
 - Setup your http CORS policy
 
 ##### Tests
 These tests may not automatic but may instead be methods called in the main() at startup so the execution stops if one of them throws an error.
-- Check if you're really able to connect ( just start the connection to the DB to check there's no error )
+- Check if you're really able to connect ( just ping the DB to check there's no error )
 - Check if you're able to fetch your credentials
 
 ### 5 - Main
-See the main_test.go file.
-That's where everything is linked together :
+***The place where everything is plugged in*** :
 - call if needed code in Infra
 
 - give the result to the toolsInterfaces you need
