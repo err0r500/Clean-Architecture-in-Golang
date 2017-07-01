@@ -115,9 +115,9 @@ Testing the use cases is done by implementing mocked interfaces. DO NOT call a D
     - *Example :*  You've got a SEND_ORDER(customerID, cartID) use case, do you check that the customerID retrieved with your (perfectly working) **getCustomerDetails(cartID)** method is the same as the one your use case received as paramater ?
 
 # 3 - Interfaces
-***Gateways to the outer world*** : That's where you actually define the **toolMethods()** in order to group them in the ***ToolInterfaces*** needed by the INTERACTOR (with tech specific code) along with their mocked versions for the test of the UseCase Layer
+>***Gateways to the outer world*** : That's where you actually define the **toolMethods()** in order to group them in the ***ToolInterfaces*** needed by the INTERACTOR (with tech specific code) along with their mocked versions for the test of the UseCase Layer
 
-- route User Interactions to USE_CASES()
+>- route User Interactions to USE_CASES()
 - adapt 3rd-party libs to make USE_CASES() "happen" (ie actually save where you want when **Save()** is called)
   - declare new structs in order to map the Domain or UseCase structs with their "framework specific" version (gorm, json...)
   - do the same for the communication in the opposite direction (remember the **ToUseCaseUser()** above)
@@ -165,7 +165,7 @@ If you test DB queries, do it on localhost !
 # 4 - Infra
 *( This layer is not implemented in this minimal example )*
 
-***Low level technical setup*** : this part will allow code written at Interfaces layer to actually operate.
+>***Low level technical setup*** : this part will allow code written at Interfaces layer to actually operate.
 
 ## Examples
 - Set the IP address and Port Number in order to connect to the Databases (use this for your Interfaces layer tests)
@@ -178,9 +178,8 @@ These tests may not automatic but may instead be methods called in the main() at
 - Check if you're able to fetch your credentials
 
 # 5 - Main
-***The place where everything is plugged in*** :
-- call if needed code in Infra
+>***The place where everything is plugged in***
 
-- give the result to the toolsInterfaces you need
-
+>- select the toolsInterfaces you want to use
+- call if needed code in Infra and pass the result to the corresponding toolsInterfaces
 - give these toolsInterfaces to an Interactor struct that will have everything in hand in order to execute the use cases
