@@ -6,29 +6,29 @@ import (
 )
 
 //User the guy who placed an order
-type user struct {
+type User struct {
 	id   int
 	name string
 }
 
 //Order content on an Order
-type order struct {
+type Order struct {
 	id     int
 	userID int
 }
 
 type orderReader interface {
-	getOrder(id int) (*order, error)
-	getUser(id int) (*user, error)
+	GetOrder(id int) (*Order, error)
+	GetUser(id int) (*User, error)
 }
 
-func checkOrder(oR orderReader, orderID int) error {
-	order, err := oR.getOrder(orderID)
+func CheckOrder(oR orderReader, orderID int) error {
+	order, err := oR.GetOrder(orderID)
 	if err != nil {
 		return errors.New("can't get Order")
 	}
 
-	user, err := oR.getUser(order.userID)
+	user, err := oR.GetUser(order.userID)
 	if err != nil {
 		return errors.New("can't get User")
 	}
