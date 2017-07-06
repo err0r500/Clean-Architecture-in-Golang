@@ -7,11 +7,6 @@ import (
 	interfaces "github.com/err0r500/cleanArchitectureGolang/interfaceTesting/errorHandling/mocks"
 )
 
-type iTester struct {
-	orderOutput int
-	userOutput  int
-}
-
 func TestCheckOrderUseCase(t *testing.T) {
 	GetOrderReturns := []interfaces.GetOrderReturn{
 		{&uc.Order{10, 20}, nil},
