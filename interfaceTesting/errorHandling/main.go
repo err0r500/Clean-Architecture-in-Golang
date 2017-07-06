@@ -1,18 +1,15 @@
 package iTesting
 
-import (
-	"errors"
-	"fmt"
-)
+import "fmt"
 
 type User struct {
-	id   int
-	name string
+	ID   int
+	Name string
 }
 
 type Order struct {
-	id     int
-	userID int
+	ID     int
+	UserID int
 }
 
 type orderReader interface {
@@ -21,16 +18,10 @@ type orderReader interface {
 }
 
 func CheckOrder(oR orderReader, orderID int) error {
-	order, err := oR.GetOrder(orderID)
-	if err != nil || order == nil {
-		return errors.New("can't get Order")
-	}
+	order, _ := oR.GetOrder(orderID)
 
-	user, err := oR.GetUser(order.userID)
-	if err != nil {
-		return errors.New("can't get User")
-	}
+	user, _ := oR.GetUser(order.UserID)
 
-	fmt.Printf("Order %d belongs to user %s !", order.id, user.name)
+	fmt.Printf("Order %d belongs to user %s !\n", order.ID, user.Name)
 	return nil
 }

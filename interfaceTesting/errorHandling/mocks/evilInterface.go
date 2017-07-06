@@ -3,18 +3,23 @@ package interfaces
 import uc "github.com/err0r500/cleanArchitectureGolang/interfaceTesting/errorHandling"
 
 type EvilInterface struct {
-	GetOrderOutput int
-	GetUserOutput  int
+	GetOrderOutput GetOrderReturn
+	GetUserOutput  GetUserReturn
+}
+
+type GetOrderReturn struct {
+	Order *uc.Order
+	Err   error
+}
+type GetUserReturn struct {
+	User *uc.User
+	Err  error
 }
 
 func (tI EvilInterface) GetOrder(id int) (*uc.Order, error) {
-	toReturn := []*uc.Order{
-		&uc.Order{},
-		nil,
-	}
-	return toReturn[tI.GetOrderOutput], nil
+	return tI.GetOrderOutput.Order, tI.GetOrderOutput.Err
 }
 
 func (tI EvilInterface) GetUser(id int) (*uc.User, error) {
-	return &uc.User{}, nil
+	return tI.GetUserOutput.User, tI.GetUserOutput.Err
 }
