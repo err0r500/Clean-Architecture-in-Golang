@@ -1,6 +1,9 @@
 package iTesting
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type User struct {
 	ID   int
@@ -18,10 +21,21 @@ type orderReader interface {
 }
 
 func CheckOrder(oR orderReader, orderID int) error {
-	order, _ := oR.GetOrder(orderID)
+	order, err := oR.GetOrder(orderID)
+	if err != nil || order == nil {
+		return errors.New("text")
+	}
+	if order.ID != orderID || order.UserID == 0 {
+		return errors.New("text")
+	}
 
-	user, _ := oR.GetUser(order.UserID)
-
+	user, err := oR.GetUser(order.UserID)
+	if err != nil || user == nil {
+		return errors.New("text")
+	}
+	if order.UserID != user.ID {
+		return errors.New("text")
+	}
 	fmt.Printf("Order %d belongs to user %s !\n", order.ID, user.Name)
 	return nil
 }

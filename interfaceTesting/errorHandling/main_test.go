@@ -1,26 +1,35 @@
 package iTesting_test
 
 import (
+	"errors"
 	"testing"
 
 	uc "github.com/err0r500/cleanArchitectureGolang/interfaceTesting/errorHandling"
-	interfaces "github.com/err0r500/cleanArchitectureGolang/interfaceTesting/errorHandling/mocks"
+	i "github.com/err0r500/cleanArchitectureGolang/interfaceTesting/errorHandling/mocks"
 )
 
 func TestCheckOrderUseCase(t *testing.T) {
-	GetOrderReturns := []interfaces.GetOrderReturn{
+	GetOrderReturns := []i.GetOrderReturn{
 		{&uc.Order{10, 20}, nil},
+		{&uc.Order{10, 20}, errors.New("hey")},
+		{nil, nil},
+		{&uc.Order{}, nil},
+		{&uc.Order{10, 0}, nil},
 	}
-	GetUserReturns := []interfaces.GetUserReturn{
+	GetUserReturns := []i.GetUserReturn{
 		{&uc.User{20, "Matth"}, nil},
+		{&uc.User{20, "Matth"}, errors.New("text")},
+		{nil, nil},
+		{&uc.User{}, nil},
+		{&uc.User{10, "m"}, nil},
 	}
 
 	for k, v := range GetOrderReturns {
-		err := uc.CheckOrder(interfaces.EvilInterface{v, GetUserReturns[0]}, 10)
+		err := uc.CheckOrder(i.EvilInterface{v, GetUserReturns[0]}, 10)
 		check(t, "GetOrder", k, err)
 	}
 	for k, v := range GetUserReturns {
-		err := uc.CheckOrder(interfaces.EvilInterface{GetOrderReturns[0], v}, 10)
+		err := uc.CheckOrder(i.EvilInterface{GetOrderReturns[0], v}, 10)
 		check(t, "GetUser", k, err)
 	}
 }
