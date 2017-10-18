@@ -5,22 +5,22 @@ import (
 	"fmt"
 )
 
-type User struct {
+type User2 struct {
 	ID   int
 	Name string
 }
 
-type Order struct {
+type Order2 struct {
 	ID     int
 	UserID int
 }
 
-type orderReader interface {
-	GetOrder(id int) (*Order, error)
-	GetUser(id int) (*User, error)
+type orderReader2 interface {
+	GetOrder(id int) (*Order2, error)
+	GetUser(id int) (*User2, error)
 }
 
-func CheckOrder(oR orderReader, orderID int) error {
+func CheckOrder2(oR orderReader2, orderID int) error {
 	order, err := oR.GetOrder(orderID)
 	if err != nil || order == nil {
 		return errors.New("unable to retreive the order")
