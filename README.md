@@ -1,5 +1,7 @@
 # Clean Architecture In Golang
 
+[![BCH compliance](https://bettercodehub.com/edge/badge/Err0r500/Clean-Architecture-in-Golang?branch=master)](https://bettercodehub.com/)
+
 >The purpose of this architecture is to be as flexible as possible in order to develop a project as quickly as possible and to maintain this speed during the whole development lifespan, whatever its size and the changes that will have to be done, for whatever reason.
 
 ### Detailed explanation of this repo :
